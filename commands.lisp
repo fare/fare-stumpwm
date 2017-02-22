@@ -5,9 +5,12 @@
   ()
   (message
    (uiop:with-output (s nil)
+     ;; Show time
      (local-time:format-rfc1123-timestring s (local-time:now))
-     ;; Also show battery:
-     (format s "~%battery status: ~A~%" (fare-scripts/shell-aliases:battery-status)))))
+     ;; Show network connections
+     (format s "~&~{Connected to ~A~%~}" (fare-scripts/network:get-wireless-connections))
+     ;; Show battery status
+     (fare-scripts/shell-aliases:battery-status s))))
 
 ;;; Sound
 (defcommand mute-sound ()
@@ -71,3 +74,8 @@
   ()
   "Run or raise Chromium"
   (run-or-raise "chromium-browser" '(:class "Chrome")))
+
+(defcommand lock-screen ()
+  ()
+  "Lock the screen"
+  (run-shell-command "xscreensaver-command -lock"))

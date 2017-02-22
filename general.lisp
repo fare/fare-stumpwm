@@ -46,3 +46,6 @@ If a program does not exit of its own accord, Stumpwm might hang!"
 (define-stumpwm-command "shell-command" ((command :string "sh: " :string))
   (check-type command string)
   (do-shell-command command))
+
+;; see also https://github.com/ivoarch/.dot-org-files/blob/master/stumpwm.org
+;; and https://github.com/alezost/stumpwm-config/find/master

@@ -31,6 +31,7 @@
     ("C-q" . "quit")
     ("E" . "activate-emacs")
     ("C" . "activate-chromium")
+    ("L" . "lock-screen")
     ("=" . "show-current-time")
     ("e" . "capture-screen"))
   "alist of keyboard commands for *root-map*")
