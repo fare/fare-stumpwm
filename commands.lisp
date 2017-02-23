@@ -63,7 +63,7 @@
 (defcommand activate-terminator ()
   ()
   "Run or raise Terminator"
-  (run-or-raise "terminator" '(:class ".terminator-wrapped")))
+  (run-or-raise "terminator" '(:class "Terminator")))
 
 (defcommand activate-emacs ()
   ()
@@ -73,7 +73,7 @@
 (defcommand activate-chromium ()
   ()
   "Run or raise Chromium"
-  (run-or-raise "chromium-browser" '(:class "Chrome")))
+  (run-or-raise "chromium-browser" '(:class "Chromium-browser")))
 
 (defcommand lock-screen ()
   ()

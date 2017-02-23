@@ -3,7 +3,7 @@
 (defparameter *window-class-renumber*
   '(("Terminator" . 0)
     ("Emacs" . 1)
-    ("Chromium" . 2))
+    ("Chromium-browser" . 2))
   "alist of window classes to be renumbered, and their target numbers.")
 
 (defun renumber-window-by-class (win)
