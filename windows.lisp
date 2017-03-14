@@ -1,8 +1,8 @@
 (in-package :stumpwm)
 
 (defparameter *window-class-renumber*
-  '(("Terminator" . 0)
-    ("Emacs" . 1)
+  '(("Emacs" . 0)
+    ("Terminator" . 1)
     ("Chromium-browser" . 2))
   "alist of window classes to be renumbered, and their target numbers.")
 

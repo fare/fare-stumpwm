@@ -13,27 +13,27 @@
      (fare-scripts/shell-aliases:battery-status s))))
 
 ;;; Sound
-(defcommand mute-sound ()
+(defcommand toggle-volume ()
   ()
-  (run-shell-command "amixer set Master off")
+  (run-shell-command "amixer set Master toggle")
   (message "toggled sound"))
 
-(defcommand lower-sound ()
+(defcommand lower-volume ()
   ()
   (run-shell-command "amixer sset Master 5%- on")
   (message "sound 5%-"))
 
-(defcommand raise-sound ()
+(defcommand raise-volume ()
   ()
   (run-shell-command "amixer sset Master 5%+ on")
   (message "sound 5%+"))
 
-(defcommand minimize-sound ()
+(defcommand minimize-volume ()
   ()
   (run-shell-command "amixer sset Master 100- off")
   (message "sound minimized"))
 
-(defcommand maximize-sound ()
+(defcommand maximize-volume ()
   ()
   (run-shell-command "amixer sset Master 100+ on")
   (message "sound maximized"))
@@ -75,7 +75,30 @@
   "Run or raise Chromium"
   (run-or-raise "chromium-browser" '(:class "Chromium-browser")))
 
+(defcommand activate-pidgin ()
+  ()
+  "Run or raise Pidgin"
+  (run-or-raise "pidgin" '(:class "Pidgin")))
+
+(defcommand activate-hexchat ()
+  ()
+  "Run or raise Hexchat"
+  (run-or-raise "hexchat" '(:class "Hexchat")))
+
 (defcommand lock-screen ()
   ()
   "Lock the screen"
   (run-shell-command "xscreensaver-command -lock"))
+
+(defcommand reconnect-wifi ()
+  ()
+  "Reconnect wifi"
+  ;; We could call (fare-scripts/network:nmup) but that would be synchronous,
+  ;; and there are cases where the command times out.
+  #|(if (poiu/fork:can-fork-p)
+      (let ((pid (posix-fork)))
+        (when (= pid -1)
+          (fare-scripts/network:nmup)))
+      (fare-scripts/network:nmup))|#
+  (run-shell-command "PATH=$HOME/bin/nix:$PATH nmup")
+  nil)

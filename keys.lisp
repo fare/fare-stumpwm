@@ -13,15 +13,13 @@
     ("M-quoteleft" . "gnext")
     ("M-S-quoteleft" . "gprev")
 
-    ;; These should already be default.
-    ;;("XF86AudioMute" . "mute-sound")
-    ;;("XF86AudioLowerVolume" . "lower-volume")
-    ;;("XF86AudioRaiseVolume" . "raise-volume")
-    ;;("S-XF86AudioLowerVolume" . "minimize-sound")
-    ;;("S-XF86AudioRaiseVolume" . "maximize-sound")
-    ;;("XF86MonBrightnessDown" . "brightness-down")
-    ;;("XF86MonBrightnessUp" . "brightness-up")
-    )
+    ("XF86AudioMute" . "toggle-volume")
+    ("XF86AudioLowerVolume" . "lower-volume")
+    ("XF86AudioRaiseVolume" . "raise-volume")
+    ("S-XF86AudioLowerVolume" . "minimize-sound")
+    ("S-XF86AudioRaiseVolume" . "maximize-sound")
+    ("XF86MonBrightnessDown" . "brightness-down")
+    ("XF86MonBrightnessUp" . "brightness-up"))
   "alist of keyboard commands for *top-map*")
 
 (defparameter *root-map-keys*
@@ -33,6 +31,9 @@
     ("C" . "activate-chromium")
     ("L" . "lock-screen")
     ("=" . "show-current-time")
+    ("\\" . "reconnect-wifi")
+    ("P" . "activate-pidgin")
+    ("H" . "activate-hexchat")
     ("e" . "capture-screen"))
   "alist of keyboard commands for *root-map*")
 

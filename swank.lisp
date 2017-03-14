@@ -1,7 +1,5 @@
 (in-package :stumpwm)
 
-(require :swank)
-
 (defvar *swank-port*
   4004
   "The default port for swank")
@@ -16,6 +14,7 @@
 
 (defcommand start-swank ()
   ()
+  "Start Swank"
   (ensure-swank))
 
 (register-stumpwm-start-hook 'start-swank)
