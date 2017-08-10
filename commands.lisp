@@ -12,6 +12,15 @@
      ;; Show battery status
      (fare-scripts/shell-aliases:battery-status s))))
 
+;; TODO: something to input the timezone and update it (globally?)
+#|
+(unless __already_done__
+  (local-time:reread-timezone-repository)
+)
+(setf local-time:*default-timezone* (local-time:find-timezone-by-location-name "Europe/Paris"))
+(setf local-time:*default-timezone* (local-time:find-timezone-by-location-name "America/New_York"))
+|#
+
 ;;; Sound
 (defcommand toggle-volume ()
   ()
@@ -63,7 +72,7 @@
 (defcommand activate-terminator ()
   ()
   "Run or raise Terminator"
-  (run-or-raise "terminator" '(:class "Terminator")))
+  (run-or-raise "terminator -l startup" '(:class "Terminator")))
 
 (defcommand activate-emacs ()
   ()
@@ -102,3 +111,32 @@
       (fare-scripts/network:nmup))|#
   (run-shell-command "PATH=$HOME/bin/nix:$PATH nmup")
   nil)
+
+(defcommand disable-touchpad () ()
+  "Disable touchpad"
+  (fare-scripts/toggle-touchpad:disable-device))
+
+(defcommand enable-touchpad () ()
+  "Enable touchpad"
+  (fare-scripts/toggle-touchpad:enable-device))
+
+(defcommand stop-chrome () ()
+  "Stop Chrome"
+  (fare-scripts/shell-aliases:stop-chrome))
+
+(defcommand continue-chrome () ()
+  "Continue Chrome"
+  (fare-scripts/shell-aliases:continue-chrome))
+
+(defcommand screen-up () ()
+  "Screen up"
+  (fare-scripts/xrandr:screen-device-up))
+(defcommand screen-right () ()
+  "Screen right"
+  (fare-scripts/xrandr:screen-device-right))
+(defcommand screen-down () ()
+  "Screen down"
+  (fare-scripts/xrandr:screen-device-down))
+(defcommand screen-left () ()
+  "Screen left"
+  (fare-scripts/xrandr:screen-device-left))
