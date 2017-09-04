@@ -1,8 +1,8 @@
 (in-package :stumpwm)
 
 ;; Show current time
-(defcommand show-current-time ()
-  ()
+(defcommand show-current-time () ()
+  "show current time and other status"
   (message
    (uiop:with-output (s nil)
      ;; Show time
@@ -12,60 +12,63 @@
      ;; Show battery status
      (fare-scripts/shell-aliases:battery-status s))))
 
+(defun set-timezone (tz)
+  (when (zerop (hash-table-count local-time::*location-name->timezone*))
+    (local-time:reread-timezone-repository))
+  (setf local-time:*default-timezone* (local-time:find-timezone-by-location-name tz)))
+
 ;; TODO: something to input the timezone and update it (globally?)
 #|
-(unless __already_done__
-  (local-time:reread-timezone-repository)
-)
-(setf local-time:*default-timezone* (local-time:find-timezone-by-location-name "Europe/Paris"))
-(setf local-time:*default-timezone* (local-time:find-timezone-by-location-name "America/New_York"))
+(set-timezone "Europe/Paris")
+(set-timezone "Europe/London")
+(set-timezone "America/New_York")
 |#
 
 ;;; Sound
-(defcommand toggle-volume ()
-  ()
+(defcommand toggle-volume () ()
+  "toggle volume"
   (run-shell-command "amixer set Master toggle")
   (message "toggled sound"))
 
-(defcommand lower-volume ()
-  ()
+(defcommand lower-volume () ()
+  "lower volume"
   (run-shell-command "amixer sset Master 5%- on")
   (message "sound 5%-"))
 
-(defcommand raise-volume ()
-  ()
+(defcommand raise-volume () ()
+  "raise volume"
   (run-shell-command "amixer sset Master 5%+ on")
   (message "sound 5%+"))
 
-(defcommand minimize-volume ()
-  ()
+(defcommand minimize-volume () ()
+  "minimize volume"
   (run-shell-command "amixer sset Master 100- off")
   (message "sound minimized"))
 
-(defcommand maximize-volume ()
-  ()
+(defcommand maximize-volume () ()
+  "maximize volume"
   (run-shell-command "amixer sset Master 100+ on")
   (message "sound maximized"))
 
 ;;; Brightness
-(defcommand brightness-down ()
-  ()
+(defcommand brightness-down () ()
+  "decrease brightness"
   (run-shell-command "xbacklight -dec 10")
   (message "brightness down"))
 
-(defcommand brightness-up ()
-  ()
+(defcommand brightness-up () ()
+  "increase brightness"
   (run-shell-command "xbacklight -inc 10")
   (message "brightness up"))
 
 ;;; Screen capture
-(defcommand capture-screen ()
-  ()
+(defcommand capture-screen () ()
+  "Capture screen"
   (run-shell-command "scrot '%Y-%m-%d_$wx$h.png' -e 'mv $f ~/DL/screencap/'"))
 
 ;;; Screen saver
-(defcommand screen-saver ()
-  ()
+(defcommand screen-saver () ()
+  "Run screen saver"
   (run-shell-command "xscreensaver-command -l"))
 
 ;;; Applications
@@ -128,15 +131,45 @@
   "Continue Chrome"
   (fare-scripts/shell-aliases:continue-chrome))
 
+(defmacro with-saved-current-window (() &body body)
+  `(call-with-saved-current-window (lambda () ,@body)))
+
+(defvar *last-focused-window* nil) ;; somehow not updated
+(defun register-focused-window (new-window &optional current-window)
+  (setf *last-focused-window* (or new-window current-window *last-focused-window*)))
+(pushnew 'register-focused-window *focus-window-hook*)
+
+(defvar *log* nil)
+(defcommand log-current-window-info () ()
+  "Log current window info"
+  (push (vector (current-window) *last-focused-window*) *log*))
+(define-key *root-map* (kbd "y") "log-current-window-info")
+
+(defcommand focus-last-window () ()
+  "Focus last windows"
+  (focus-window (or (current-window) *last-focused-window*)))
+(define-key *root-map* (kbd "Y") "focus-last-window")
+
+(defun call-with-saved-current-window (thunk)
+  (register-focused-window (current-window))
+  (unwind-protect
+       (funcall thunk)
+    (sleep 3)
+    (focus-last-window)))
+
 (defcommand screen-up () ()
   "Screen up"
-  (fare-scripts/xrandr:screen-device-up))
+  (with-saved-current-window ()
+    (fare-scripts/xrandr:screen-device-up)))
 (defcommand screen-right () ()
   "Screen right"
-  (fare-scripts/xrandr:screen-device-right))
+  (with-saved-current-window ()
+    (fare-scripts/xrandr:screen-device-right)))
 (defcommand screen-down () ()
   "Screen down"
-  (fare-scripts/xrandr:screen-device-down))
+  (with-saved-current-window ()
+    (fare-scripts/xrandr:screen-device-down)))
 (defcommand screen-left () ()
   "Screen left"
-  (fare-scripts/xrandr:screen-device-left))
+  (with-saved-current-window ()
+    (fare-scripts/xrandr:screen-device-left)))
