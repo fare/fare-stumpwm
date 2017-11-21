@@ -8,7 +8,8 @@
      ;; Show time
      (local-time:format-rfc1123-timestring s (local-time:now))
      ;; Show network connections
-     (format s "~&~{Connected to ~A~%~}" (fare-scripts/network:get-wireless-connections))
+     (uiop:if-let (connection (ignore-errors (fare-scripts/network:get-wireless-connections)))
+       (format s "~&~{Connected to ~A~%~}" connection))
      ;; Show battery status
      (fare-scripts/shell-aliases:battery-status s))))
 
