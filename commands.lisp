@@ -52,15 +52,36 @@
   (message "sound maximized"))
 
 ;;; Brightness
+
+;; TODO: (1) move that to fare-scripts (2) make it work automatically on non-intel video cards.
+(defvar *brightness-path* "/sys/class/backlight/intel_backlight/brightness")
+(defvar *max-brightness-path* "/sys/class/backlight/intel_backlight/max_brightness")
+(defun get-brightness () (uiop:read-file-form *brightness-path*))
+(defun get-max-brightness () (uiop:read-file-form *max-brightness-path*))
+;;(defun set-brightness (b) (with-output-file (o *brightness-path*) (princ b o))) ;; must be done as root
+(defun set-brightness (b)
+  (uiop:run-program `("sudo" "tee" ,*brightness-path*) :input `(,(princ-to-string b)) :output t :error-output t))
+(defun fit-bounds (min max n)
+  (cond
+    ((< n min) min)
+    ((> n max) max)
+    (t n)))
+(defun adjust-brightness (percent)
+  (let* ((brightness (get-brightness))
+         (max-brightness (get-max-brightness))
+         (new-brightness (fit-bounds 0 max-brightness
+                                     (+ brightness (round (* max-brightness 1/100 percent))))))
+    (set-brightness new-brightness)
+    (round (* 100 new-brightness) max-brightness)))
 (defcommand brightness-down () ()
   "decrease brightness"
-  (run-shell-command "xbacklight -dec 10")
-  (message "brightness down"))
+  ;;(run-shell-command "xbacklight -dec 10") (message "brightness down")
+  (message (format nil "brightness down to ~A%" (adjust-brightness -10))))
 
 (defcommand brightness-up () ()
   "increase brightness"
-  (run-shell-command "xbacklight -inc 10")
-  (message "brightness up"))
+  ;;(run-shell-command "xbacklight -inc 10")(message "brightness up")
+  (message (format nil "brightness up to ~A%" (adjust-brightness +10))))
 
 ;;; Screen capture
 (defcommand capture-screen () ()
