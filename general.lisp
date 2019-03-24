@@ -30,8 +30,8 @@
   (set-unfocus-color "#000000")
   (set-font "-xos4-terminus-medium-r-normal--12-320-72-72-c-60-iso8859-1")
   (set-font "-*-proggyclean-*-*-*-*-*-320-*-*-*-*-*-*")
-  (set-font "-*-lucidatypewriter-*-*-*-*-*-400-*-*-*-*-*-*")
-  (set-font (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 36))
+  (set-font "-*-lucidatypewriter-*-*-*-*-*-320-*-*-*-*-*-*")
+  (set-font (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 30))
   nil)
 
 (register-stumpwm-start-hook 'fare-defaults)
