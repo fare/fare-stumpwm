@@ -11,7 +11,7 @@
   :license "MIT or bugroff"
   :author "Francois-Rene Rideau"
   :version "0.0.2"
-  :depends-on ("poiu" ;; loading it first to speed the build.
+  :depends-on (;;"poiu" ;; loading it first to speed the build.
                "stumpwm"
                "fare-scripts" "local-time" "ttf-fonts" "swank")
   :components
