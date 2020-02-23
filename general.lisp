@@ -28,10 +28,10 @@
 (defun fare-defaults ()
   (set-focus-color "#00FF00")
   (set-unfocus-color "#000000")
-  (set-font "-xos4-terminus-medium-r-normal--12-320-72-72-c-60-iso8859-1")
-  (set-font "-*-proggyclean-*-*-*-*-*-320-*-*-*-*-*-*")
-  (set-font "-*-lucidatypewriter-*-*-*-*-*-320-*-*-*-*-*-*")
-  (set-font (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 30))
+  (ignore-errors (set-font "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"))
+  (ignore-errors (set-font "-*-proggyclean-*-*-*-*-*-240-*-*-*-*-*-*"))
+  (ignore-errors (set-font "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"))
+  (ignore-errors (set-font (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 26)))
   nil)
 
 (register-stumpwm-start-hook 'fare-defaults)
@@ -46,6 +46,18 @@ If a program does not exit of its own accord, Stumpwm might hang!"
 (define-stumpwm-command "shell-command" ((command :string "sh: " :string))
   (check-type command string)
   (do-shell-command command))
+
+;; Work around memory leak in cl-truetype
+;; https://github.com/stumpwm/stumpwm/issues/474#issuecomment-481885037
+(run-with-timer
+ 900 900
+ (lambda ()
+   (loop for font in (stumpwm::screen-fonts (current-screen))
+         when (typep font 'xft:font)
+           do (clrhash (xft::font-string-line-bboxes font))
+              (clrhash (xft::font-string-line-alpha-maps font))
+              (clrhash (xft::font-string-bboxes font))
+              (clrhash (xft::font-string-alpha-maps font)))))
 
 ;; see also https://github.com/ivoarch/.dot-org-files/blob/master/stumpwm.org
 ;; and https://github.com/alezost/stumpwm-config/find/master
