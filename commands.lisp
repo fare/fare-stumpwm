@@ -26,30 +26,33 @@
 |#
 
 ;;; Sound
+(defun volume-status ()
+  (message (uiop:run-program `("amixer" "get" "Master") :input nil :output :string :error-output nil)))
+
 (defcommand toggle-volume () ()
   "toggle volume"
   (run-shell-command "amixer set Master toggle")
-  (message "toggled sound"))
+  (volume-status))
 
 (defcommand lower-volume () ()
   "lower volume"
   (run-shell-command "amixer sset Master 5%- on")
-  (message "sound 5%-"))
+  (volume-status))
 
 (defcommand raise-volume () ()
   "raise volume"
   (run-shell-command "amixer sset Master 5%+ on")
-  (message "sound 5%+"))
+  (volume-status))
 
 (defcommand minimize-volume () ()
   "minimize volume"
   (run-shell-command "amixer sset Master 100- off")
-  (message "sound minimized"))
+  (volume-status))
 
 (defcommand maximize-volume () ()
   "maximize volume"
   (run-shell-command "amixer sset Master 100+ on")
-  (message "sound maximized"))
+  (volume-status))
 
 ;;; Brightness
 
