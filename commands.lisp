@@ -54,6 +54,14 @@
   (run-shell-command "amixer sset Master 100+ on")
   (volume-status))
 
+(defun microphone-status ()
+  (message (uiop:run-program `("amixer" "get" "Capture") :input nil :output :string :error-output nil)))
+
+(defcommand toggle-microphone () ()
+  "toggle microphone"
+  (run-shell-command "amixer set Capture toggle")
+  (microphone-status))
+
 ;;; Brightness
 
 ;; TODO: (1) move that to fare-scripts (2) make it work automatically on non-intel video cards.
