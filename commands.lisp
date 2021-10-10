@@ -7,6 +7,7 @@
    (uiop:with-output (s nil)
      ;; Show time
      (local-time:format-rfc1123-timestring s (local-time:now))
+     (terpri s)
      ;; Show network connections
      (uiop:if-let (connection (ignore-errors (fare-scripts/network:get-wireless-connections)))
        (format s "~&~{Connected to ~A~%~}" connection))
@@ -27,39 +28,42 @@
 
 ;;; Sound
 (defun volume-status ()
-  (message (uiop:run-program `("amixer" "get" "Master") :input nil :output :string :error-output nil)))
+  (message (uiop:run-program `("pamixer" "--get-volume-human")
+                             :input nil :output :string :error-output nil :ignore-error-status t)))
 
 (defcommand toggle-volume () ()
   "toggle volume"
-  (run-shell-command "amixer set Master toggle")
+  (message (uiop:run-program `("pamixer" "--toggle-mute")
+                             :input nil :output :string :error-output nil :ignore-error-status t))
   (volume-status))
 
 (defcommand lower-volume () ()
   "lower volume"
-  (run-shell-command "amixer sset Master 5%- on")
+  (run-shell-command "pamixer --unmute --decrease 5")
   (volume-status))
 
 (defcommand raise-volume () ()
   "raise volume"
-  (run-shell-command "amixer sset Master 5%+ on")
+  (run-shell-command "pamixer --unmute --increase 5")
   (volume-status))
 
 (defcommand minimize-volume () ()
   "minimize volume"
-  (run-shell-command "amixer sset Master 100- off")
+  (run-shell-command "pamixer --mute --set-volume 0")
   (volume-status))
 
 (defcommand maximize-volume () ()
   "maximize volume"
-  (run-shell-command "amixer sset Master 100+ on")
+  (run-shell-command "pamixer --unmute --set-volume 100")
   (volume-status))
 
-(defun microphone-status ()
-  (message (uiop:run-program `("amixer" "get" "Capture") :input nil :output :string :error-output nil)))
+(defun microphone-status () ;; TODO: fix that
+  (message (uiop:run-program `("pamixer" "--source" "1" "--get-volume-human")
+                             :input nil :output :string :error-output nil :ignore-error-status t)))
 
 (defcommand toggle-microphone () ()
   "toggle microphone"
-  (run-shell-command "amixer set Capture toggle")
+  (run-shell-command "pamixer" "--source" "1" "--toggle-mute")
   (microphone-status))
 
 ;;; Brightness
@@ -71,7 +75,8 @@
 (defun get-max-brightness () (uiop:read-file-form *max-brightness-path*))
 ;;(defun set-brightness (b) (with-output-file (o *brightness-path*) (princ b o))) ;; must be done as root
 (defun set-brightness (b)
-  (uiop:run-program `("sudo" "tee" ,*brightness-path*) :input `(,(princ-to-string b)) :output t :error-output t))
+  (uiop:run-program `("sudo" "tee" ,*brightness-path*)
+                    :input `(,(princ-to-string b)) :output t :error-output t :ignore-error-status t))
 (defun fit-bounds (min max n)
   (cond
     ((< n min) min)

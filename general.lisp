@@ -25,9 +25,17 @@
       *input-window-gravity* :top-right
       *message-window-gravity* :top-right)
 
+(defun in-home (p)
+  (uiop:unix-namestring (uiop:subpathname (user-homedir-pathname) p)))
+
 (defun fare-defaults ()
   (set-focus-color "#00FF00")
   (set-unfocus-color "#000000")
+  (setf xft:*font-dirs*
+        (list (in-home ".fonts/")
+              (in-home ".guix-profile/share/fonts/")
+              "/run/current-system/profile/share/fonts/"
+              "/usr/share/fonts/"))
   (ignore-errors (set-font "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"))
   (ignore-errors (set-font "-*-proggyclean-*-*-*-*-*-240-*-*-*-*-*-*"))
   (ignore-errors (set-font "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"))
