@@ -28,18 +28,25 @@
 (defun in-home (p)
   (uiop:unix-namestring (uiop:subpathname (user-homedir-pathname) p)))
 
+(defvar *orig-font-dirs* xft:*font-dirs*)
+
 (defun fare-defaults ()
   (set-focus-color "#00FF00")
   (set-unfocus-color "#000000")
   (setf xft:*font-dirs*
-        (list (in-home ".fonts/")
-              (in-home ".guix-profile/share/fonts/")
-              "/run/current-system/profile/share/fonts/"
-              "/usr/share/fonts/"))
-  (ignore-errors (set-font "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"))
-  (ignore-errors (set-font "-*-proggyclean-*-*-*-*-*-240-*-*-*-*-*-*"))
-  (ignore-errors (set-font "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"))
-  (ignore-errors (set-font (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 26)))
+        (list* (in-home ".fonts/") ;; HOME
+               (in-home ".nix-profile/share/X11/fonts/") ;; NixOS
+               "/run/current-system/sw/share/X11/fonts/" ;; NixOS
+               (in-home ".guix-profile/share/fonts/") ;; GUIX
+               "/run/current-system/profile/share/fonts/" ;; GUIX
+               "/usr/share/fonts/")) ;; Debian
+  (clx-truetype:cache-fonts)
+  (map nil (lambda (x) (ignore-errors (set-font x)))
+       (list "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"
+             "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"
+             "-misc-ubuntu mono-bold-r-normal--32-0-0-0-m-0-iso10646-1"
+             (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 26))
+             ))
   nil)
 
 (register-stumpwm-start-hook 'fare-defaults)

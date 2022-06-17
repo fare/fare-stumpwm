@@ -21,9 +21,10 @@
 
 ;; TODO: something to input the timezone and update it (globally?)
 #|
-(set-timezone "Europe/Paris")
-(set-timezone "Europe/London")
-(set-timezone "America/New_York")
+(stumpwm::set-timezone "US/Eastern")
+(stumpwm::set-timezone "US/Pacific")
+(stumpwm::set-timezone "Europe/Paris")
+(stumpwm::set-timezone "Europe/London")
 |#
 
 ;;; Sound
@@ -39,22 +40,26 @@
 
 (defcommand lower-volume () ()
   "lower volume"
-  (run-shell-command "pamixer --unmute --decrease 5")
+  (uiop:run-program `("pamixer" "--unmute" "--decrease" "5")
+                    :input nil :output nil :error-output nil :ignore-error-status t)
   (volume-status))
 
 (defcommand raise-volume () ()
   "raise volume"
-  (run-shell-command "pamixer --unmute --increase 5")
+  (uiop:run-program `("pamixer" "--unmute" "--increase" "5")
+                    :input nil :output nil :error-output nil :ignore-error-status t)
   (volume-status))
 
 (defcommand minimize-volume () ()
   "minimize volume"
-  (run-shell-command "pamixer --mute --set-volume 0")
+  (uiop:run-program `("pamixer" "--unmute" "--set-volume" "0")
+                    :input nil :output nil :error-output nil :ignore-error-status t)
   (volume-status))
 
 (defcommand maximize-volume () ()
   "maximize volume"
-  (run-shell-command "pamixer --unmute --set-volume 100")
+  (uiop:run-program `("pamixer" "--unmute" "--set-volume" "100")
+                    :input nil :output nil :error-output nil :ignore-error-status t)
   (volume-status))
 
 (defun microphone-status () ;; TODO: fix that
@@ -63,7 +68,8 @@
 
 (defcommand toggle-microphone () ()
   "toggle microphone"
-  (run-shell-command "pamixer" "--source" "1" "--toggle-mute")
+  (uiop:run-program `("pamixer" "--source" "1" "--toggle-mute")
+                    :input nil :output nil :error-output nil :ignore-error-status t)
   (microphone-status))
 
 ;;; Brightness
@@ -74,6 +80,11 @@
 (defun get-brightness () (uiop:read-file-form *brightness-path*))
 (defun get-max-brightness () (uiop:read-file-form *max-brightness-path*))
 ;;(defun set-brightness (b) (with-output-file (o *brightness-path*) (princ b o))) ;; must be done as root
+;; TODO: instead, be using a logarithmic scale? 0, 1... 1060
+;; (defun f (n) (round (1- (expt (1+ maxbri) (/ n 20))))) ;; for n from 1 to 20, because (f 0) = (f 1) = 0 ?
+;; but then need to decompose current level?
+;; (defun g (l) (* 20 (log (1+ l) (1+ maxbri)))) ;; <= bad behavior around 0 :-(
+
 (defun set-brightness (b)
   (uiop:run-program `("sudo" "tee" ,*brightness-path*)
                     :input `(,(princ-to-string b)) :output t :error-output t :ignore-error-status t))
@@ -91,13 +102,13 @@
     (round (* 100 new-brightness) max-brightness)))
 (defcommand brightness-down () ()
   "decrease brightness"
-  ;;(run-shell-command "xbacklight -dec 10") (message "brightness down")
-  (message (format nil "brightness down to ~A%" (adjust-brightness -10))))
+  ;;(run-shell-command "xbacklight -dec 5") (message "brightness down")
+  (message (format nil "brightness down to ~A%" (adjust-brightness -5))))
 
 (defcommand brightness-up () ()
   "increase brightness"
-  ;;(run-shell-command "xbacklight -inc 10")(message "brightness up")
-  (message (format nil "brightness up to ~A%" (adjust-brightness +10))))
+  ;;(run-shell-command "xbacklight -inc 5")(message "brightness up")
+  (message (format nil "brightness up to ~A%" (adjust-brightness +5))))
 
 ;;; Screen capture
 (defcommand capture-screen () ()

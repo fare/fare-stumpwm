@@ -17,7 +17,8 @@
              hostname
              (logname)
              (uiop:subpathname (user-homedir-pathname) "etc/X11/Xdefaults.m4")))
-    ;;(run-shell-command "xscreensaver -nosplash") ;; Looks like GUIX obsoleted xscreensaver with its own system
+    ;; Looks like GUIX obsoleted xscreensaver with its own system
+    (run-shell-command "[ -f /etc/NIXOS ] && xscreensaver -nosplash")
     (activate-initial-clients)
     ;;(run-commands "grename 1" "gnewbg 2")
     nil))
