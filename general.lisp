@@ -14,7 +14,6 @@
   "Run the hook function for when stumpwm starts"
   (uiop:call-functions *stumpwm-start-hook*))
 
-
 (clear-window-placement-rules)
 
 (setf *mouse-focus-policy* :sloppy
@@ -45,8 +44,7 @@
        (list "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"
              "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"
              "-misc-ubuntu mono-bold-r-normal--32-0-0-0-m-0-iso10646-1"
-             (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Regular" :size 26))
-             ))
+             (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Bold" :size 16))))
   nil)
 
 (register-stumpwm-start-hook 'fare-defaults)
