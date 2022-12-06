@@ -33,18 +33,18 @@
   (set-focus-color "#00FF00")
   (set-unfocus-color "#000000")
   (setf xft:*font-dirs*
-        (list* (in-home ".fonts/") ;; HOME
-               (in-home ".nix-profile/share/X11/fonts/") ;; NixOS
-               "/run/current-system/sw/share/X11/fonts/" ;; NixOS
-               (in-home ".guix-profile/share/fonts/") ;; GUIX
-               "/run/current-system/profile/share/fonts/" ;; GUIX
-               "/usr/share/fonts/")) ;; Debian
-  (clx-truetype:cache-fonts)
-  (map nil (lambda (x) (ignore-errors (set-font x)))
-       (list "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"
-             "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"
-             "-misc-ubuntu mono-bold-r-normal--32-0-0-0-m-0-iso10646-1"
-             (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Bold" :size 16))))
+        (list (in-home ".fonts/") ;; HOME
+              (in-home ".nix-profile/share/X11/fonts/") ;; NixOS
+              "/run/current-system/sw/share/X11/fonts/" ;; NixOS
+              (in-home ".guix-profile/share/fonts/") ;; GUIX
+              "/run/current-system/profile/share/fonts/" ;; GUIX
+              "/usr/share/fonts/")) ;; Debian
+  ;;(clx-truetype:cache-fonts)
+  (dolist (x (list ;; "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"
+                   (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Bold" :size 16))
+                   "-misc-ubuntu mono-bold-r-normal--32-0-0-0-m-0-iso10646-1"
+                   "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"))
+    (when (ignore-errors (set-font x)) (return)))
   nil)
 
 (register-stumpwm-start-hook 'fare-defaults)
@@ -62,7 +62,7 @@ If a program does not exit of its own accord, Stumpwm might hang!"
 
 ;; Work around memory leak in cl-truetype
 ;; https://github.com/stumpwm/stumpwm/issues/474#issuecomment-481885037
-(run-with-timer
+'(run-with-timer
  900 900
  (lambda ()
    (loop for font in (stumpwm::screen-fonts (current-screen))
