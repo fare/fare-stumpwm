@@ -1,5 +1,6 @@
 (uiop:call-image-restore-hook)
-(asdf:load-system "stumpwm")
+(asdf:load-system "load-quicklisp")
+(ql:quickload "stumpwm")
 (stumpwm:stumpwm)
 
 #| ;; In ~/.stumpwmrc:
