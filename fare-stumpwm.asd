@@ -8,9 +8,9 @@
 |#
 
 (defsystem "fare-stumpwm"
-  :license "MIT or bugroff"
+  :license "MIT" ;; or bugroff
   :author "Francois-Rene Rideau"
-  :version "0.0.2"
+  :version "0.1.0"
   :depends-on (;;"poiu" ;; loading it first to speed the build.
                "stumpwm"
                "fare-scripts" "local-time" "ttf-fonts" "swank")
