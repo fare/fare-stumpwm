@@ -26,10 +26,10 @@
 (defvar *initial-clients-activated* nil)
 
 (defun activate-initial-clients ()
-  (unless *initial-clients-activated*
-    (setf *initial-clients-activated* t)
+  (unless (or *initial-clients-activated* (all-windows))
     (activate-emacs)
     (activate-terminator)
-    (activate-chromium)))
+    (activate-chromium))
+  (setf *initial-clients-activated* t))
 
 (register-stumpwm-start-hook 'my-start)
