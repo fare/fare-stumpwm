@@ -121,38 +121,31 @@
   (run-shell-command "xscreensaver-command -l"))
 
 ;;; Applications
-(defcommand activate-terminator ()
-  ()
+(defcommand activate-terminator () ()
   "Run or raise Terminator"
   (run-or-raise "terminator -l startup" '(:class "Terminator")))
 
-(defcommand activate-emacs ()
-  ()
+(defcommand activate-emacs () ()
   "Run or raise Emacs"
   (run-or-raise "emacs" '(:class "Emacs")))
 
-(defcommand activate-chromium ()
-  ()
+(defcommand activate-chromium () ()
   "Run or raise Chromium"
   (run-or-raise "chromium-browser" '(:class "Chromium-browser")))
 
-(defcommand activate-pidgin ()
-  ()
+(defcommand activate-pidgin () ()
   "Run or raise Pidgin"
   (run-or-raise "pidgin" '(:class "Pidgin")))
 
-(defcommand activate-hexchat ()
-  ()
+(defcommand activate-hexchat () ()
   "Run or raise Hexchat"
   (run-or-raise "hexchat" '(:class "Hexchat")))
 
-(defcommand lock-screen ()
-  ()
+(defcommand lock-screen () ()
   "Lock the screen"
   (run-shell-command "xscreensaver-command -lock"))
 
-(defcommand reconnect-wifi ()
-  ()
+(defcommand reconnect-wifi () ()
   "Reconnect wifi"
   ;; We could call (fare-scripts/network:nmup) but that would be synchronous,
   ;; and there are cases where the command times out.

@@ -3,16 +3,9 @@
 #+sbcl (defvar *sbcl-home* (uiop:lisp-implementation-directory))
 #+sbcl (sb-posix:unsetenv "SBCL_HOME")
 
-(defvar *stumpwm-start-hook* nil
-  "Functions to run at stumpwm startup")
-
 (defun register-stumpwm-start-hook (hook)
   "Register a hook function to be run when stumpwm starts"
-  (uiop:register-hook-function '*stumpwm-start-hook* hook))
-
-(defun call-stumpwm-start-hook ()
-  "Run the hook function for when stumpwm starts"
-  (uiop:call-functions *stumpwm-start-hook*))
+  (add-hook *start-hook* hook))
 
 (clear-window-placement-rules)
 
@@ -41,13 +34,15 @@
               "/usr/share/fonts/")) ;; Debian
   ;;(clx-truetype:cache-fonts)
   (dolist (x (list ;; "-xos4-terminus-medium-r-normal--12-240-72-72-c-60-iso8859-1"
-                   (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Bold" :size 16))
+                   (ignore-errors (make-instance 'xft:font :family "CMU Typewriter Text" :subfamily "Bold" :size 12))
                    "-misc-ubuntu mono-bold-r-normal--32-0-0-0-m-0-iso10646-1"
                    "-*-lucidatypewriter-*-*-*-*-*-240-*-*-*-*-*-*"))
     (when (ignore-errors (set-font x)) (return)))
+  (setf *startup-message* "Welcome to Faré's StumpWM")
   nil)
 
-(register-stumpwm-start-hook 'fare-defaults)
+(fare-defaults)
+;;(register-stumpwm-start-hook 'fare-defaults)
 
 (defun do-shell-command (command)
   "Run a shell command and display output to screen.

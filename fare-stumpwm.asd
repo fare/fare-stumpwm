@@ -10,7 +10,7 @@
 (defsystem "fare-stumpwm"
   :license "MIT" ;; or bugroff
   :author "Francois-Rene Rideau"
-  :version "0.1.0"
+  :version "0.1.1"
   :depends-on (;;"poiu" ;; loading it first to speed the build.
                "stumpwm"
                "fare-scripts" "local-time" "ttf-fonts" "swank")
