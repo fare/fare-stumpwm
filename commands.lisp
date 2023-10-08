@@ -17,7 +17,8 @@
 (defun set-timezone (tz)
   (when (zerop (hash-table-count local-time::*location-name->timezone*))
     (local-time:reread-timezone-repository))
-  (setf local-time:*default-timezone* (local-time:find-timezone-by-location-name tz)))
+  (if-let (tzo (local-time:find-timezone-by-location-name tz))
+    (setf local-time:*default-timezone* tzo)))
 
 ;; TODO: something to input the timezone and update it (globally?)
 #|
