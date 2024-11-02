@@ -7,8 +7,6 @@
   "Register a hook function to be run when stumpwm starts"
   (add-hook *start-hook* hook))
 
-(clear-window-placement-rules)
-
 (setf *mouse-focus-policy* :sloppy
       *window-border-style* :thin
       *maxsize-border-width* 1
@@ -23,6 +21,7 @@
 (defvar *orig-font-dirs* xft:*font-dirs*)
 
 (defun fare-defaults ()
+  (clear-window-placement-rules)
   (set-focus-color "#00FF00")
   (set-unfocus-color "#000000")
   (setf xft:*font-dirs*
@@ -41,8 +40,7 @@
   (setf *startup-message* "Welcome to Faré's StumpWM")
   nil)
 
-(fare-defaults)
-;;(register-stumpwm-start-hook 'fare-defaults)
+(register-stumpwm-start-hook 'fare-defaults)
 
 (defun do-shell-command (command)
   "Run a shell command and display output to screen.
