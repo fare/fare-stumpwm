@@ -22,11 +22,16 @@
 
 ;; TODO: something to input the timezone and update it (globally?)
 #|
-(stumpwm::set-timezone "US/Eastern")
-(stumpwm::set-timezone "US/Pacific")
-(stumpwm::set-timezone "Europe/Paris")
-(stumpwm::set-timezone "Europe/London")
+(NYC)
+(SFO)
+(Paris)
+(London)
 |#
+(defun NYC () (stumpwm::set-timezone "US/Eastern")) ; EDT in summer, EST in winter
+(defun SFO () (stumpwm::set-timezone "US/Pacific")) ; PDT in summer, PST in winter
+(defun Paris () (stumpwm::set-timezone "Europe/Paris")) ; CEST in summer, CET in winter
+(defun London () (stumpwm::set-timezone "Europe/London")) ; BST in summer GMT in winter
+
 
 ;;; Sound
 (defun volume-status ()
