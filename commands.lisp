@@ -7,7 +7,7 @@
    (uiop:with-output (s nil)
      ;; Show time
      (local-time:format-rfc1123-timestring s (local-time:now))
-     (terpri s)
+     (format s "~%~A~%" (machine-instance))
      ;; Show network connections
      (uiop:if-let (connection (ignore-errors (fare-scripts/network:get-wireless-connections)))
        (format s "~&~{Connected to ~A~%~}" connection))
@@ -81,8 +81,10 @@
 ;;; Brightness
 
 ;; TODO: (1) move that to fare-scripts (2) make it work automatically on non-intel video cards.
-(defvar *brightness-path* "/sys/class/backlight/intel_backlight/brightness")
-(defvar *max-brightness-path* "/sys/class/backlight/intel_backlight/max_brightness")
+(defparameter *brightness-path*
+  (first (uiop:directory-files "/sys/class/backlight/" "*/brightness")))
+(defparameter *max-brightness-path*
+  (uiop:merge-pathnames* "max_brightness" *brightness-path*))
 (defun get-brightness () (uiop:read-file-form *brightness-path*))
 (defun get-max-brightness () (uiop:read-file-form *max-brightness-path*))
 ;;(defun set-brightness (b) (with-output-file (o *brightness-path*) (princ b o))) ;; must be done as root
@@ -92,7 +94,7 @@
 ;; (defun g (l) (* 20 (log (1+ l) (1+ maxbri)))) ;; <= bad behavior around 0 :-(
 
 (defun set-brightness (b)
-  (uiop:run-program `("sudo" "tee" ,*brightness-path*)
+  (uiop:run-program `("sudo" "tee" ,(uiop:native-namestring *brightness-path*))
                     :input `(,(princ-to-string b)) :output t :error-output t :ignore-error-status t))
 (defun fit-bounds (min max n)
   (cond
@@ -138,6 +140,10 @@
 (defcommand activate-chromium () ()
   "Run or raise Chromium"
   (run-or-raise "chromium-browser" '(:class "Chromium-browser")))
+
+(defcommand activate-brave () ()
+  "Run or raise Brave"
+  (run-or-raise "brave-browser" '(:class "Brave-browser")))
 
 (defcommand activate-pidgin () ()
   "Run or raise Pidgin"
