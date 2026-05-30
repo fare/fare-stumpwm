@@ -35,8 +35,8 @@
     ("E" . "activate-emacs")
     ("C" . "activate-chromium")
     ("L" . "lock-screen")
-    ("=" . "show-current-time")
-    ("C-=" . "show-current-time")
+    ("=" . "status")
+    ("C-=" . "status")
     ("\\" . "reconnect-wifi")
     ("P" . "activate-pidgin")
     ("H" . "activate-hexchat")
@@ -54,8 +54,8 @@
 
 (defun my-keys ()
   (set-prefix-key (kbd "C-t"))
-  (map-keys *top-map* *top-map-keys*)
   (map-keys *root-map* *root-map-keys*)
+  (map-keys *top-map* *top-map-keys*)
   nil)
 
 (register-stumpwm-start-hook 'my-keys)

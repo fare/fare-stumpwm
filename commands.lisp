@@ -1,7 +1,7 @@
 (in-package :stumpwm)
 
 ;; Show current time
-(defcommand show-current-time () ()
+(defcommand status () ()
   "show current time and other status"
   (message
    (uiop:with-output (s nil)
@@ -9,12 +9,12 @@
      (local-time:format-rfc1123-timestring s (local-time:now))
      (format s "~%~A~%" (machine-instance))
      ;; Show network connections
-     (uiop:if-let (connection (ignore-errors (fare-scripts/network:get-wireless-connections)))
-       (format s "~&~{Connected to ~A~%~}" connection))
+     (format s "~&~A" (fare-scripts/network:wireless-connection-status))
      ;; Show battery status
      (fare-scripts/shell-aliases:battery-status s))))
 
 (defun set-timezone (tz)
+  "Set the default timezone to one named after string TZ"
   (when (zerop (hash-table-count local-time::*location-name->timezone*))
     (local-time:reread-timezone-repository))
   (if-let (tzo (local-time:find-timezone-by-location-name tz))
@@ -24,138 +24,40 @@
 #|
 (NYC)
 (SFO)
-(Paris)
 (London)
+(Paris)
+(Athens)
 |#
 (defun NYC () (stumpwm::set-timezone "US/Eastern")) ; EDT in summer, EST in winter
 (defun SFO () (stumpwm::set-timezone "US/Pacific")) ; PDT in summer, PST in winter
-(defun Paris () (stumpwm::set-timezone "Europe/Paris")) ; CEST in summer, CET in winter
 (defun London () (stumpwm::set-timezone "Europe/London")) ; BST in summer GMT in winter
+(defun Paris () (stumpwm::set-timezone "Europe/Paris")) ; CEST in summer, CET in winter
+(defun Athens () (stumpwm::set-timezone "Europe/Athens")) ; EEST in summer, EET in winter
 
+(defmacro def-cli-command (name package &rest wrapper)
+  (let ((sym (uiop:find-symbol* name package)))
+    `(defcommand ,name () ()
+       ,(documentation sym 'function)
+       ,(append (or wrapper '(progn))
+                `(message (,sym))))))
 
-;;; Sound
-(defun volume-status ()
-  (message (uiop:run-program `("pamixer" "--get-volume-human")
-                             :input nil :output :string :error-output nil :ignore-error-status t)))
+(def-cli-command toggle-volume :fare-scripts/audio)
+(def-cli-command lower-volume :fare-scripts/audio)
+(def-cli-command raise-volume :fare-scripts/audio)
+(def-cli-command minimize-volume :fare-scripts/audio)
+(def-cli-command maximize-volume :fare-scripts/audio)
+(def-cli-command toggle-microphone :fare-scripts/audio)
 
-(defcommand toggle-volume () ()
-  "toggle volume"
-  (message (uiop:run-program `("pamixer" "--toggle-mute")
-                             :input nil :output :string :error-output nil :ignore-error-status t))
-  (volume-status))
+(def-cli-command brightness-down :fare-scripts/video)
+(def-cli-command brightness-up :fare-scripts/video)
+(def-cli-command capture-screen :fare-scripts/video)
+(def-cli-command lock-screen :fare-scripts/video)
 
-(defcommand lower-volume () ()
-  "lower volume"
-  (uiop:run-program `("pamixer" "--unmute" "--decrease" "5")
-                    :input nil :output nil :error-output nil :ignore-error-status t)
-  (volume-status))
-
-(defcommand raise-volume () ()
-  "raise volume"
-  (uiop:run-program `("pamixer" "--unmute" "--increase" "5")
-                    :input nil :output nil :error-output nil :ignore-error-status t)
-  (volume-status))
-
-(defcommand minimize-volume () ()
-  "minimize volume"
-  (uiop:run-program `("pamixer" "--unmute" "--set-volume" "0")
-                    :input nil :output nil :error-output nil :ignore-error-status t)
-  (volume-status))
-
-(defcommand maximize-volume () ()
-  "maximize volume"
-  (uiop:run-program `("pamixer" "--unmute" "--set-volume" "100")
-                    :input nil :output nil :error-output nil :ignore-error-status t)
-  (volume-status))
-
-(defun microphone-status () ;; TODO: fix that
-  (message (uiop:run-program `("pamixer" "--source" "1" "--get-volume-human")
-                             :input nil :output :string :error-output nil :ignore-error-status t)))
-
-(defcommand toggle-microphone () ()
-  "toggle microphone"
-  (uiop:run-program `("pamixer" "--source" "1" "--toggle-mute")
-                    :input nil :output nil :error-output nil :ignore-error-status t)
-  (microphone-status))
-
-;;; Brightness
-
-;; TODO: (1) move that to fare-scripts (2) make it work automatically on non-intel video cards.
-(defparameter *brightness-path*
-  (first (uiop:directory-files "/sys/class/backlight/" "*/brightness")))
-(defparameter *max-brightness-path*
-  (uiop:merge-pathnames* "max_brightness" *brightness-path*))
-(defun get-brightness () (uiop:read-file-form *brightness-path*))
-(defun get-max-brightness () (uiop:read-file-form *max-brightness-path*))
-;;(defun set-brightness (b) (with-output-file (o *brightness-path*) (princ b o))) ;; must be done as root
-;; TODO: instead, be using a logarithmic scale? 0, 1... 1060
-;; (defun f (n) (round (1- (expt (1+ maxbri) (/ n 20))))) ;; for n from 1 to 20, because (f 0) = (f 1) = 0 ?
-;; but then need to decompose current level?
-;; (defun g (l) (* 20 (log (1+ l) (1+ maxbri)))) ;; <= bad behavior around 0 :-(
-
-(defun set-brightness (b)
-  (uiop:run-program `("sudo" "tee" ,(uiop:native-namestring *brightness-path*))
-                    :input `(,(princ-to-string b)) :output t :error-output t :ignore-error-status t))
-(defun fit-bounds (min max n)
-  (cond
-    ((< n min) min)
-    ((> n max) max)
-    (t n)))
-(defun adjust-brightness (percent)
-  (let* ((brightness (get-brightness))
-         (max-brightness (get-max-brightness))
-         (new-brightness (fit-bounds 0 max-brightness
-                                     (+ brightness (round (* max-brightness 1/100 percent))))))
-    (set-brightness new-brightness)
-    (round (* 100 new-brightness) max-brightness)))
-(defcommand brightness-down () ()
-  "decrease brightness"
-  ;;(run-shell-command "xbacklight -dec 5") (message "brightness down")
-  (message (format nil "brightness down to ~A%" (adjust-brightness -5))))
-
-(defcommand brightness-up () ()
-  "increase brightness"
-  ;;(run-shell-command "xbacklight -inc 5")(message "brightness up")
-  (message (format nil "brightness up to ~A%" (adjust-brightness +5))))
-
-;;; Screen capture
-(defcommand capture-screen () ()
-  "Capture screen"
-  (run-shell-command "scrot '%Y-%m-%d_$wx$h.png' -e 'mv $f ~/DL/screencap/'"))
-
-;;; Screen saver
-(defcommand screen-saver () ()
-  "Run screen saver"
-  (run-shell-command "xscreensaver-command -l"))
-
-;;; Applications
-(defcommand activate-terminator () ()
-  "Run or raise Terminator"
-  (run-or-raise "terminator -l startup" '(:class "Terminator")))
-
-(defcommand activate-emacs () ()
-  "Run or raise Emacs"
-  (run-or-raise "emacs" '(:class "Emacs")))
-
-(defcommand activate-chromium () ()
-  "Run or raise Chromium"
-  (run-or-raise "chromium-browser" '(:class "Chromium-browser")))
-
-(defcommand activate-brave () ()
-  "Run or raise Brave"
-  (run-or-raise "brave-browser" '(:class "Brave-browser")))
-
-(defcommand activate-pidgin () ()
-  "Run or raise Pidgin"
-  (run-or-raise "pidgin" '(:class "Pidgin")))
-
-(defcommand activate-hexchat () ()
-  "Run or raise Hexchat"
-  (run-or-raise "hexchat" '(:class "Hexchat")))
-
-(defcommand lock-screen () ()
-  "Lock the screen"
-  (run-shell-command "xscreensaver-command -lock"))
+(def-cli-command lock-screen :fare-scripts/video)
+(def-cli-command disable-touchpad :fare-scripts/toggle-touchpad)
+(def-cli-command enable-touchpad :fare-scripts/toggle-touchpad)
+(def-cli-command stop-chrome :fare-scripts/shell-aliases)
+(def-cli-command continue-chrome :fare-scripts/shell-aliases)
 
 (defcommand reconnect-wifi () ()
   "Reconnect wifi"
@@ -169,21 +71,20 @@
   (run-shell-command "PATH=$HOME/bin/nix:$PATH nmup")
   nil)
 
-(defcommand disable-touchpad () ()
-  "Disable touchpad"
-  (fare-scripts/toggle-touchpad:disable-device))
+(defmacro def-activate-command (command &optional arguments class)
+  (let* ((command (if (symbolp command) (string-downcase command) command))
+         (activator (uiop:intern* (uiop:strcat "ACTIVATE-" (string-upcase command)) :stumpwm))
+         (class (or class (string-capitalize command))))
+    `(defcommand ,activator () ()
+       ,(format nil "Run or raise ~A" class)
+       (run-or-raise ,(format nil "~A~@[ ~A~]" command arguments) '(:class ,class)))))
 
-(defcommand enable-touchpad () ()
-  "Enable touchpad"
-  (fare-scripts/toggle-touchpad:enable-device))
-
-(defcommand stop-chrome () ()
-  "Stop Chrome"
-  (fare-scripts/shell-aliases:stop-chrome))
-
-(defcommand continue-chrome () ()
-  "Continue Chrome"
-  (fare-scripts/shell-aliases:continue-chrome))
+(def-activate-command terminator "-l startup")
+(def-activate-command emacs)
+(def-activate-command chromium-browser)
+(def-activate-command brave-browser)
+;;(def-activate-command pidgin)
+;;(def-activate-command hexchat)
 
 (defmacro with-saved-current-window (() &body body)
   `(call-with-saved-current-window (lambda () ,@body)))
@@ -211,19 +112,7 @@
     (sleep 3)
     (focus-last-window)))
 
-(defcommand screen-up () ()
-  "Screen up"
-  (with-saved-current-window ()
-    (fare-scripts/xrandr:screen-device-up)))
-(defcommand screen-right () ()
-  "Screen right"
-  (with-saved-current-window ()
-    (fare-scripts/xrandr:screen-device-right)))
-(defcommand screen-down () ()
-  "Screen down"
-  (with-saved-current-window ()
-    (fare-scripts/xrandr:screen-device-down)))
-(defcommand screen-left () ()
-  "Screen left"
-  (with-saved-current-window ()
-    (fare-scripts/xrandr:screen-device-left)))
+(def-cli-command screen-up :fare-scripts/video with-saved-current-window ())
+(def-cli-command screen-right :fare-scripts/video with-saved-current-window ())
+(def-cli-command screen-down :fare-scripts/video with-saved-current-window ())
+(def-cli-command screen-left :fare-scripts/video with-saved-current-window ())
