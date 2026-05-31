@@ -53,7 +53,6 @@
 (def-cli-command capture-screen :fare-scripts/video)
 (def-cli-command lock-screen :fare-scripts/video)
 
-(def-cli-command lock-screen :fare-scripts/video)
 (def-cli-command disable-touchpad :fare-scripts/toggle-touchpad)
 (def-cli-command enable-touchpad :fare-scripts/toggle-touchpad)
 (def-cli-command stop-chrome :fare-scripts/shell-aliases)
