@@ -59,3 +59,5 @@
   nil)
 
 (register-stumpwm-start-hook 'my-keys)
+
+;; (stumpwm::run-hook stumpwm::*start-hook*)

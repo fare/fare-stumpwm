@@ -38,6 +38,6 @@
       (run-shell-command "xscreensaver -nosplash"))
     (activate-emacs)
     (activate-terminator)
-    (activate-brave)))
+    (activate-brave-browser)))
 
 (register-stumpwm-start-hook 'my-start)
