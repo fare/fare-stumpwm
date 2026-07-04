@@ -1,4 +1,4 @@
-(in-package :stumpwm)
+(in-package :stumpwm-user)
 
 #+sbcl (defvar *sbcl-home* (uiop:lisp-implementation-directory))
 #+sbcl (sb-posix:unsetenv "SBCL_HOME")

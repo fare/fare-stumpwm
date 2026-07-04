@@ -1,4 +1,4 @@
-(in-package :stumpwm)
+(in-package :stumpwm-user)
 
 (defun logname ()
   #+sbcl (sb-unix:uid-username (sb-unix:unix-getuid))
@@ -32,7 +32,7 @@
 (defvar *initial-clients-activated* nil)
 
 (defun activate-initial-clients ()
-  (unless (or *initial-clients-activated* (all-windows))
+  (unless (or *initial-clients-activated* (stumpwm::all-windows))
     (setf *initial-clients-activated* t)
     (unless (is-guix-p) ;; Looks like GUIX obsoleted xscreensaver with its own system
       (run-shell-command "xscreensaver -nosplash"))

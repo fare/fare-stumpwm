@@ -1,4 +1,4 @@
-(in-package :stumpwm)
+(in-package :stumpwm-user)
 
 ;;(define-key *root-map* (kbd "h") '*help-map*)
 

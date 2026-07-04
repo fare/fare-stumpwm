@@ -1,4 +1,4 @@
-(in-package :stumpwm)
+(in-package :stumpwm-user)
 
 ;; Show current time
 (defcommand status () ()
@@ -15,9 +15,9 @@
 
 (defun set-timezone (tz)
   "Set the default timezone to one named after string TZ"
-  (when (zerop (hash-table-count local-time::*location-name->timezone*))
+  (when (> 2 (hash-table-count local-time::*location-name->timezone*))
     (local-time:reread-timezone-repository))
-  (if-let (tzo (local-time:find-timezone-by-location-name tz))
+  (uiop:if-let (tzo (local-time:find-timezone-by-location-name tz))
     (setf local-time:*default-timezone* tzo)))
 
 ;; TODO: something to input the timezone and update it (globally?)
@@ -28,18 +28,18 @@
 (Paris)
 (Athens)
 |#
-(defun NYC () (stumpwm::set-timezone "US/Eastern")) ; EDT in summer, EST in winter
-(defun SFO () (stumpwm::set-timezone "US/Pacific")) ; PDT in summer, PST in winter
-(defun London () (stumpwm::set-timezone "Europe/London")) ; BST in summer GMT in winter
-(defun Paris () (stumpwm::set-timezone "Europe/Paris")) ; CEST in summer, CET in winter
-(defun Athens () (stumpwm::set-timezone "Europe/Athens")) ; EEST in summer, EET in winter
+(defun NYC () (set-timezone "US/Eastern")) ; EDT in summer, EST in winter
+(defun SFO () (set-timezone "US/Pacific")) ; PDT in summer, PST in winter
+(defun London () (set-timezone "Europe/London")) ; BST in summer GMT in winter
+(defun Paris () (set-timezone "Europe/Paris")) ; CEST in summer, CET in winter
+(defun Athens () (set-timezone "Europe/Athens")) ; EEST in summer, EET in winter
 
 (defmacro def-cli-command (name package &rest wrapper)
   (let ((sym (uiop:find-symbol* name package)))
     `(defcommand ,name () ()
        ,(documentation sym 'function)
        ,(append (or wrapper '(progn))
-                `(message (,sym))))))
+                `((message (,sym)))))))
 
 (def-cli-command toggle-volume :fare-scripts/audio)
 (def-cli-command lower-volume :fare-scripts/audio)
@@ -72,11 +72,11 @@
 
 (defmacro def-activate-command (command &optional arguments class)
   (let* ((command (if (symbolp command) (string-downcase command) command))
-         (activator (uiop:intern* (uiop:strcat "ACTIVATE-" (string-upcase command)) :stumpwm))
+         (activator (uiop:intern* (uiop:strcat "ACTIVATE-" (string-upcase command)) :stumpwm-user))
          (class (or class (string-capitalize command))))
     `(defcommand ,activator () ()
        ,(format nil "Run or raise ~A" class)
-       (run-or-raise ,(format nil "~A~@[ ~A~]" command arguments) '(:class ,class)))))
+       (run-or-raise ,(format nil "exec ~A~@[ ~A~]" command arguments) '(:class ,class)))))
 
 (def-activate-command terminator "-l startup")
 (def-activate-command emacs)

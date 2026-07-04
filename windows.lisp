@@ -1,4 +1,4 @@
-(in-package :stumpwm)
+(in-package :stumpwm-user)
 
 (defparameter *window-class-renumber*
   '(("Emacs" . 0)
@@ -30,6 +30,6 @@
             (setf (window-number win) target-number))
 
         ;; Finally
-        (update-all-mode-lines)))))
+        (stumpwm::update-all-mode-lines)))))
 
 (add-hook *new-window-hook* 'renumber-window-by-class)
