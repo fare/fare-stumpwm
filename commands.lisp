@@ -9,7 +9,7 @@
      (local-time:format-rfc1123-timestring s (local-time:now))
      (format s "~%~A~%" (machine-instance))
      ;; Show network connections
-     (format s "~&~A" (fare-scripts/network:wireless-connection-status))
+     (fare-scripts/network:wireless-connection-status s)
      ;; Show battery status
      (fare-scripts/shell-aliases:battery-status s))))
 
